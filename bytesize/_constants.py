@@ -16,6 +16,11 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
+from decimal import Decimal
+from fractions import Fraction
+
+import six
+
 """ Constants used by the bytesize package.
 
     Categories of constants:
@@ -134,3 +139,5 @@ def UNITS():
     return ([B] + BinaryUnits.UNITS() + DecimalUnits.UNITS())[:]
 
 ROUNDING_METHODS = RoundingMethods.METHODS
+
+PRECISE_NUMERIC_TYPES = (six.integer_types, Decimal, Fraction)
