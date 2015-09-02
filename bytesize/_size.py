@@ -43,6 +43,7 @@ from ._constants import DecimalUnits
 from ._constants import PRECISE_NUMERIC_TYPES
 
 from ._util import format_magnitude
+from ._util import get_bytes
 from ._util import round_fraction
 
 _BYTES_SYMBOL = "B"
@@ -66,6 +67,23 @@ class Size(object):
             strip=config.strip
         )
 
+    @classmethod
+    def getSizeFromInput(value=0, units=None):
+        """ Get a Size object from an input value and units.
+
+            :param value: a size value, default is 0
+            :type value: Size, or any finite numeric type (possibly as str)
+            :param units: the units of the size, default is None
+            :type units: any of the publicly defined units constants
+            :returns: a Size object
+            :rtype: :class:`Size`
+            :raises SizeValueError: on bad parameters
+
+            This method looks for a best Size, so the result Size has
+            a magnitude that does not exactly equal value * units.
+        """
+        num_bytes = get_bytes(value, units)
+
     def __init__(self, value=0, units=None):
         """ Initialize a new Size object.
 
@@ -81,23 +99,16 @@ class Size(object):
             are rounded. Rounding is always toward 0. So,
             Size('-0.5', B) == Size(0), not Size(-1).
         """
-        if isinstance(value, six.string_types) or \
-           isinstance(value, PRECISE_NUMERIC_TYPES):
-            try:
-                magnitude = int(Fraction(value) * int(units or B))
-            except (ValueError, TypeError):
-                raise SizeValueError(value, "value")
-
-        elif isinstance(value, Size):
+        if isinstance(value, Size):
             if units is not None:
                 raise SizeValueError(
                    units,
                    "units",
                    "meaningless when Size value is passed"
                 )
-            magnitude = value
-        else:
-            raise SizeValueError(value, "value")
+            value = int(value)
+
+        magnitude = get_bytes(value, units)
 
         self._magnitude = int(magnitude)
 
